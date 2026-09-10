@@ -35,9 +35,19 @@ any damage beyond this repo's `data/location.json` file:
 Create a new **Personal Automation** (Shortcuts app → Automation tab → + → Create Personal
 Automation) so it can run unattended (turn OFF "Ask Before Running").
 
-**Trigger:** "Location Changed" (fires on significant location changes — good balance of
-freshness vs. battery while travelling). Alternative: a repeating "Time of Day" automation
-if you want a fixed interval instead.
+**Trigger:** Apple removed the generic "Location Changed" trigger from newer iOS versions —
+Personal Automations now only offer location triggers as **"Arrive"** or **"Leave"** a
+specific place (geofences), which isn't useful for continuous tracking while travelling.
+Use a repeating **"Time of Day"** trigger instead:
+
+1. Automation tab → + → *Create Personal Automation* → **Time of Day**.
+2. Set a start time, then tap **Repeat** → *Hourly* (or your preferred interval — every
+   15–30 min gives a livelier map but uses more battery).
+3. Continue to build the actions below, and turn OFF "Ask Before Running" so it fires
+   silently in the background.
+
+> Note: iOS may throttle background automations somewhat to save battery, so updates might
+> arrive a few minutes later than scheduled — that's expected and fine for this use case.
 
 **Actions:**
 1. `Get Current Location`
