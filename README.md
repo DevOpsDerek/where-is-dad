@@ -1,10 +1,10 @@
-# Where's Derek? 📍
+# Where's Dad? 📍
 
 A tiny, static "share my location" site for Nicola &amp; Elliott. No servers, no third-party
 tracking apps — just this repo, GitHub Pages, and an iPhone Shortcut.
 
 **How it works**
-1. An iOS Shortcut on Derek's phone gets his current GPS location and commits an updated
+1. An iOS Shortcut on Dad's phone gets his current GPS location and commits an updated
    `data/location.json` straight to this repo using the GitHub REST API.
 2. GitHub Pages serves `index.html`, which fetches `data/location.json` every minute and
    drops a pin on a map (Leaflet + OpenStreetMap, both free, no API key needed).
@@ -16,7 +16,7 @@ tracking apps — just this repo, GitHub Pages, and an iPhone Shortcut.
 
 ### 1. Enable GitHub Pages
 Already configured by automation to serve from the `main` branch, root folder.
-Site URL: `https://devopsderek.github.io/where-is-derek/`
+Site URL: `https://devopsderek.github.io/where-is-dad/`
 
 ### 2. Create a scoped GitHub Personal Access Token (for the Shortcut only)
 Use a **fine-grained PAT**, restricted to this one repo, so a lost/stolen phone can't do
@@ -25,7 +25,7 @@ any damage beyond this repo's `data/location.json` file:
 1. GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens →
    *Generate new token*.
 2. Resource owner: `DevOpsDerek`. Repository access: **Only select repositories** →
-   `where-is-derek`.
+   `where-is-dad`.
 3. Permissions → Repository permissions → **Contents: Read and write**. Leave everything
    else as "No access".
 4. Set an expiry (e.g. 90 days — just remember to rotate it before/after your trip) and
@@ -42,7 +42,7 @@ if you want a fixed interval instead.
 **Actions:**
 1. `Get Current Location`
 2. `Get Contents of URL`
-   - URL: `https://api.github.com/repos/DevOpsDerek/where-is-derek/contents/data/location.json`
+   - URL: `https://api.github.com/repos/DevOpsDerek/where-is-dad/contents/data/location.json`
    - Method: GET
    - Headers: `Authorization: Bearer YOUR_PAT`, `Accept: application/vnd.github+json`
    - This returns the file's current `sha`, which GitHub requires for updates.
