@@ -9,7 +9,7 @@ tracking apps — just this repo, GitHub Pages, and an iPhone Shortcut.
 2. GitHub Pages serves `index.html`, which fetches `data/location.json` every minute and
    drops a pin on a map (Leaflet + OpenStreetMap, both free, no API key needed).
 3. The site is public with no login — it's protected only by having an unguessable-ish
-   nothing, i.e. it's fully open by design (per Derek's choice). Don't put anything
+   nothing, i.e. it's fully open by design (per Dad's choice). Don't put anything
    sensitive in `location.json` beyond coordinates/timestamp.
 
 ## One-time setup
@@ -32,53 +32,59 @@ any damage beyond this repo's `data/location.json` file:
    generate the token. Copy it once; you won't see it again.
 
 ### 3. Build the iOS Shortcut
-Create a new **Personal Automation** (Shortcuts app → Automation tab → + → Create Personal
-Automation) so it can run unattended (turn OFF "Ask Before Running").
+Recent iOS versions restrict `Get Current Location` from being added as a standalone
+action **inside a Personal Automation** — it only shows up when building an ordinary
+Shortcut. The fix is to build all the logic as a normal Shortcut, then have the
+Automation simply run it.
 
-**Trigger:** Apple removed the generic "Location Changed" trigger from newer iOS versions —
-Personal Automations now only offer location triggers as **"Arrive"** or **"Leave"** a
-specific place (geofences), which isn't useful for continuous tracking while travelling.
-Use a repeating **"Time of Day"** trigger instead:
+**3a. Create the Shortcut (does the actual work):**
+1. Shortcuts app → **My Shortcuts** tab → **+** → name it e.g. `Update Dad Location`.
+2. Add the actions below (in order):
+   1. `Get Current Location`
+   2. `Get Contents of URL`
+      - URL: `https://api.github.com/repos/DevOpsDerek/where-is-dad/contents/data/location.json`
+      - Method: GET
+      - Headers: `Authorization: Bearer YOUR_PAT`, `Accept: application/vnd.github+json`
+      - This returns the file's current `sha`, which GitHub requires for updates.
+   3. `Get Dictionary Value` → key `sha` from the result of the step above → save as
+      **Current SHA**.
+   4. `Text` action, build the JSON payload (use the Location variable from step 1 for
+      latitude/longitude):
+      ```
+      {"lat": [Latitude], "lon": [Longitude], "timestamp": "[Current Date, ISO 8601]", "message": "Thinking of you both! ❤️"}
+      ```
+   5. `Base64 Encode` the text from the step above → save as **Encoded Content**.
+   6. `Get Contents of URL` (the actual update):
+      - URL: same as above
+      - Method: PUT
+      - Headers: `Authorization: Bearer YOUR_PAT`, `Accept: application/vnd.github+json`
+      - Request Body (JSON):
+        ```
+        {
+          "message": "Update location",
+          "content": "Encoded Content",
+          "sha": "Current SHA",
+          "branch": "main"
+        }
+        ```
+3. Run it once manually from My Shortcuts to confirm it works (grant location permission
+   when prompted — choose "While Using" or "Always").
 
-1. Automation tab → + → *Create Personal Automation* → **Time of Day**.
+**3b. Create the Automation (just triggers the Shortcut on a schedule):**
+1. Automation tab → **+** → *Create Personal Automation* → **Time of Day**.
 2. Set a start time, then tap **Repeat** → *Hourly* (or your preferred interval — every
    15–30 min gives a livelier map but uses more battery).
-3. Continue to build the actions below, and turn OFF "Ask Before Running" so it fires
-   silently in the background.
+3. Add action → `Run Shortcut` → select **Update Dad Location** (the one created above).
+4. Turn OFF "Ask Before Running" so it fires silently in the background.
 
 > Note: iOS may throttle background automations somewhat to save battery, so updates might
 > arrive a few minutes later than scheduled — that's expected and fine for this use case.
+> Also go to **Settings → Privacy & Security → Location Services → Shortcuts** and set it
+> to **Always**, otherwise background runs may silently fail to get a location.
 
-**Actions:**
-1. `Get Current Location`
-2. `Get Contents of URL`
-   - URL: `https://api.github.com/repos/DevOpsDerek/where-is-dad/contents/data/location.json`
-   - Method: GET
-   - Headers: `Authorization: Bearer YOUR_PAT`, `Accept: application/vnd.github+json`
-   - This returns the file's current `sha`, which GitHub requires for updates.
-3. `Get Dictionary Value` → key `sha` from the result of step 2 → save as **Current SHA**.
-4. `Text` action, build the JSON payload (use the Location variable from step 1 for
-   latitude/longitude):
-   ```
-   {"lat": [Latitude], "lon": [Longitude], "timestamp": "[Current Date, ISO 8601]", "message": "Thinking of you both! ❤️"}
-   ```
-5. `Base64 Encode` the text from step 4 → save as **Encoded Content**.
-6. `Get Contents of URL` (the actual update):
-   - URL: same as step 2
-   - Method: PUT
-   - Headers: `Authorization: Bearer YOUR_PAT`, `Accept: application/vnd.github+json`
-   - Request Body (JSON):
-     ```
-     {
-       "message": "Update location",
-       "content": "Encoded Content",
-       "sha": "Current SHA",
-       "branch": "main"
-     }
-     ```
-
-That's it — every time the automation fires, it pushes a new `data/location.json`, GitHub
-Pages picks it up on next fetch (within ~60s), and the map updates for anyone with the link.
+That's it — every time the automation fires, it runs the Shortcut, which pushes a new
+`data/location.json`. GitHub Pages picks it up on next fetch (within ~60s), and the map
+updates for anyone with the link.
 
 ## Security notes
 - The site and the location file are fully public, per your choice — anyone with the URL
