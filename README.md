@@ -38,7 +38,7 @@ Shortcut. The fix is to build all the logic as a normal Shortcut, then have the
 Automation simply run it.
 
 **3a. Create the Shortcut (does the actual work):**
-1. Shortcuts app → **My Shortcuts** tab → **+** → name it e.g. `Update Dad Location`.
+1. Shortcuts app → **Library** tab → **+** → name it e.g. `Update Dad Location`.
 2. Add the actions below (in order):
    1. `Get Current Location`
    2. `Get Contents of URL`
@@ -67,7 +67,7 @@ Automation simply run it.
           "branch": "main"
         }
         ```
-3. Run it once manually from My Shortcuts to confirm it works (grant location permission
+3. Run it once manually from the Library tab to confirm it works (grant location permission
    when prompted — choose "While Using" or "Always").
 
 **3b. Create the Automation (just triggers the Shortcut on a schedule):**
